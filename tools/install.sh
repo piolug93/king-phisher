@@ -113,7 +113,7 @@ function sync_dependencies {
 		fi
 		yum install -y freetype-devel gcc gcc-c++ libpng-devel make \
 			openssl-devel postgresql-devel python36-gobject python36-cairo \
-			geos geos-devel cairo cairo-devel \
+			geos geos-devel cairo cairo-devel python3-devel \
 			gobject-introspection-devel cairo-gobject cairo-gobject-devel
 		if [ "$KING_PHISHER_USE_POSTGRESQL" == "yes" ]; then
 			yum install -y postgresql-server
