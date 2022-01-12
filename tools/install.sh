@@ -107,13 +107,9 @@ function sync_dependencies {
 		if [ ! "$(command -v python3)" ]; then
 			echo "INFO: Synchronizing Python3.5 for Red Hat 7"
 			# manually add rpms for easy python35 install
-			yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-			rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-			yum -y install https://rhel7.iuscommunity.org/ius-release.rpm
-			rpm --import /etc/pki/rpm-gpg/IUS-COMMUNITY-GPG-KEY
-			yum install -y python35u python35u-devel python35u-pip
+			yum install -y python36 python36-devel python3-pip
 			echo "INFO: Symlinking $(which python3.5) -> /usr/bin/python3"
-			ln -s $(which python3.5) /usr/bin/python3
+			ln -s $(which python3.6) /usr/bin/python3
 		fi
 		yum install -y freetype-devel gcc gcc-c++ libpng-devel make \
 			openssl-devel postgresql-devel
