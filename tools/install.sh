@@ -96,6 +96,8 @@ function select_nix_distro {
 			KING_PHISHER_SKIP_CLIENT="x";;
 		8) LINUX_VERSION="RedHat"
 			KING_PHISHER_SKIP_CLIENT="x";;
+		9) LINUX_VERSION="RedHat8"
+			KING_PHISHER_SKIP_CLIENT="x";;
 		*) echo "ERROR: Invalid Linux selection, must be 1-8"
 			exit 0;;
 	esac
@@ -103,24 +105,34 @@ function select_nix_distro {
 
 function sync_dependencies {
 	echo "INFO: Synchronizing $LINUX_VERSION OS dependencies"
-	if [ "$LINUX_VERSION" == "RedHat" ]; then
+	if [ "$LINUX_VERSION" == "RedHat" ] || [ "$LINUX_VERSION" == "RedHat8" ]; then
 		if [ ! "$(command -v python3)" ]; then
-			echo "INFO: Synchronizing Python3.5 for Red Hat 7"
+			echo "INFO: Synchronizing Python3.6 for Red Hat 7"
 			# manually add rpms for easy python35 install
 			yum install -y python36 python36-devel python3-pip
-			echo "INFO: Symlinking $(which python3.5) -> /usr/bin/python3"
+			echo "INFO: Symlinking $(which python3.6) -> /usr/bin/python3"
 			ln -s $(which python3.6) /usr/bin/python3
 		fi
+		if [ "$LINUX_VERSION" == "RedHat8" ]; then
+			yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+			yum install -y 	python3-gobject python3-cairo
+		fi
+		if [ "$LINUX_VERSION" == "RedHat" ]; then
+			yum install -y 	python36-gobject python36-cairo
+		fi
 		yum install -y freetype-devel gcc gcc-c++ libpng-devel make \
-			openssl-devel postgresql-devel python36-gobject python36-cairo \
+			openssl-devel postgresql-devel \
 			geos geos-devel cairo cairo-devel python3-devel \
 			gobject-introspection-devel cairo-gobject cairo-gobject-devel
+		
+		
 		if [ "$KING_PHISHER_USE_POSTGRESQL" == "yes" ]; then
 			yum install -y postgresql-server
 			# manually init the database
 			postgresql-setup initdb
 		fi
 	fi
+	
 	if [ "$LINUX_VERSION" == "CentOS" ]; then
 		if [ ! "$(command -v python3)" ]; then
 			# manually install python3.5 on CentOS 7 and symlink it to python3
@@ -231,7 +243,7 @@ function sync_dependencies {
 }
 
 function install_postgres {
-	if [ "$LINUX_VERSION" == "RedHat" ]; then
+	if [ "$LINUX_VERSION" == "RedHat" ] || [ "$LINUX_VERSION" == "RedHat8" ]; then
 		yum install -y postgresql-server
 		# manually init the database
 		postgresql-setup initdb
@@ -317,6 +329,11 @@ if [[ ! $LINUX_VERSION ]] && grep -E "Red Hat Enterprise Linux Server release 7(
 	KING_PHISHER_SKIP_CLIENT="x"
 fi
 
+if [[ ! $LINUX_VERSION ]] && grep -E "Red Hat Enterprise Linux release 8(\.[0-9])" /etc/redhat-release &> /dev/null; then
+	LINUX_VERSION="RedHat8"
+	KING_PHISHER_SKIP_CLIENT="x"
+fi
+
 if [[ ! $LINUX_VERSION ]] && grep -E "Fedora release 2[8-9]|3[0-4]" /etc/redhat-release &> /dev/null; then
 	LINUX_VERSION="Fedora"
 fi
@@ -361,8 +378,9 @@ if [ -z "$LINUX_VERSION" ]; then
 	echo "  6  - BackBox"
 	echo "  7  - CentOS (Server Support Only)"
 	echo "  8  - Red Hat (Server Support Only)"
+	echo "  9  - Red Hat 8 (Server Support Only)"
 	echo ""
-	echo -n "Select 1-8: "
+	echo -n "Select 1-9: "
 	select_nix_distro
 	echo "INFO: Selected Linux version is $LINUX_VERSION"
 	prompt_yes_or_no "Continue? (There is no guarantee or support beyond this point)" select_nix_continue
@@ -420,7 +438,7 @@ fi
 
 # install git if necessary
 if [ ! "$(command -v git)" ]; then
-	if [ "$LINUX_VERSION" == "CentOS" ] || [ "$LINUX_VERSION" == "RedHat" ]; then
+	if [ "$LINUX_VERSION" == "CentOS" ] || [ "$LINUX_VERSION" == "RedHat" ] || [ "$LINUX_VERSION" == "RedHat8" ]; then
 		yum install -y -q git
 	elif [ "$LINUX_VERSION" == "Fedora" ]; then
 		dnf install -y -q git
