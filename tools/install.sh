@@ -116,6 +116,7 @@ function sync_dependencies {
 		if [ "$LINUX_VERSION" == "RedHat8" ]; then
 			yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 			yum install -y 	python3-gobject python3-cairo
+			ln -s /usr/local/bin/pipenv /usr/bin/pipenv
 		fi
 		if [ "$LINUX_VERSION" == "RedHat" ]; then
 			yum install -y 	python36-gobject python36-cairo
