@@ -128,13 +128,6 @@ function sync_dependencies {
 			openssl-devel postgresql-devel \
 			geos geos-devel cairo cairo-devel python3-devel \
 			gobject-introspection-devel cairo-gobject cairo-gobject-devel
-		
-		
-		if [ "$KING_PHISHER_USE_POSTGRESQL" == "yes" ]; then
-			yum install -y postgresql-server
-			# manually init the database
-			postgresql-setup initdb
-		fi
 	fi
 	
 	if [ "$LINUX_VERSION" == "CentOS" ]; then
@@ -154,11 +147,6 @@ function sync_dependencies {
 		yum install -y freetype-devel gcc gcc-c++ libpng-devel make \
 			openssl-devel postgresql-devel geos geos-devel cairo cairo-devel\
 			gobject-introspection-devel cairo-gobject cairo-gobject-devel
-		if [ "$KING_PHISHER_USE_POSTGRESQL" == "yes" ]; then
-			yum install -y postgresql-server
-			# manually init the database
-			postgresql-setup initdb
-		fi
 	elif [ "$LINUX_VERSION" == "Fedora" ]; then
 		dnf install -y freetype-devel gcc gcc-c++ gtk3-devel \
 			libpng-devel postgresql-devel python3-devel python3-pip cairo-devel\
@@ -254,11 +242,11 @@ function install_postgres {
 	if [ "$LINUX_VERSION" == "RedHat" ] || [ "$LINUX_VERSION" == "RedHat8" ]; then
 		yum install -y postgresql-server
 		# manually init the database
-		postgresql-setup initdb
+		postgresql-setup --initdb
 	elif [ "$LINUX_VERSION" == "CentOS" ]; then
 		yum install -y postgresql-server
 		# manually init the database
-		postgresql-setup initdb
+		postgresql-setup --initdb
 	elif [ "$LINUX_VERSION" == "Fedora" ]; then
 		dnf install -y postgresql-server
 	elif [ "$LINUX_VERSION" == "BackBox" ] || \
