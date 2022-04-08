@@ -80,6 +80,7 @@ function show_help {
 	echo "  -y, --yes             answer yes to all questions"
 	echo "  --skip-client         skip installing client components"
 	echo "  --skip-server         skip installing server components"
+	echo "  --skip-install-repo   skip installing repos"
 	return 0;
 }
 
@@ -114,7 +115,9 @@ function sync_dependencies {
 			ln -s $(which python3.6) /usr/bin/python3
 		fi
 		if [ "$LINUX_VERSION" == "RedHat8" ]; then
-			yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+			if [ -z "$INSTALL_REPO_SKIP" ]; then
+				yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+			fi
 			yum install -y 	python3-gobject python3-cairo
 			ln -s /usr/local/bin/pipenv /usr/bin/pipenv
 		fi
@@ -138,12 +141,16 @@ function sync_dependencies {
 		if [ ! "$(command -v python3)" ]; then
 			# manually install python3.5 on CentOS 7 and symlink it to python3
 			echo "INFO: Synchronizing Python3.5 for CentOS 7"
-			yum install -y https://centos7.iuscommunity.org/ius-release.rpm
+			if [ -z "$INSTALL_REPO_SKIP" ]; then
+				yum install -y https://centos7.iuscommunity.org/ius-release.rpm
+			fi
 			yum install -y python35u python35u-devel python35u-pip
 			echo "INFO: Symlinking $(which python3.5) -> /usr/bin/python3"
 			ln -s $(which python3.5) /usr/bin/python3
 		fi
-		yum install -y epel-release
+		if [ -z "$INSTALL_REPO_SKIP" ]; then
+			yum install -y epel-release
+		fi
 		yum install -y freetype-devel gcc gcc-c++ libpng-devel make \
 			openssl-devel postgresql-devel geos geos-devel cairo cairo-devel\
 			gobject-introspection-devel cairo-gobject cairo-gobject-devel
@@ -293,6 +300,9 @@ while :; do
 			;;
 		--skip-server)
 			KING_PHISHER_SKIP_SERVER="x"
+			;;
+		--skip-install-repo)
+			INSTALL_REPO_SKIP="x"
 			;;
 		-u|--update)
 			UPDATE="x"
@@ -477,9 +487,12 @@ if [ "$LINUX_VERSION" == "Kali" ]; then
 	if ! grep -i 'rolling' /etc/debian_version &> /dev/null; then
 		echo "INFO: Checking Kali 2 apt sources"
 		if ! grep -E "deb http://http\.kali\.org/kali sana main non-free contrib" /etc/apt/sources.list &> /dev/null; then
-			echo "INFO: Standard Kali 2 apt sources are missing, now adding them, see"
-			echo "INFO: https://www.kali.org/docs/general-use/kali-linux-sources-list-repositories/ for more details"
-			echo "deb http://http.kali.org/kali sana main non-free contrib" >> /etc/apt/sources.list
+			echo "INFO: Standard Kali 2 apt sources are missing"
+			if [ -z "$INSTALL_REPO_SKIP" ]; then
+			  echo "INFO: Standard Kali 2 apt sources are missing, now adding them, see"
+			  echo "INFO: https://www.kali.org/docs/general-use/kali-linux-sources-list-repositories/ for more details"
+			  echo "deb http://http.kali.org/kali sana main non-free contrib" >> /etc/apt/sources.list
+			fi
 			apt-get update
 		fi
 	fi
