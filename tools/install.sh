@@ -541,7 +541,7 @@ if [ -z "$KING_PHISHER_SKIP_SERVER" ]; then
 		fi
 		if [ -f "/usr/lib/systemd/system/postgresql.service" ]; then
 			systemctl start postgresql &> /dev/null
-			if ! systemctl is-active &> /dev/null; then
+			if ! systemctl is-active postgresql &> /dev/null; then
 				if [ "$LINUX_VERSION" == "Arch" ]; then
 					su - postgres -c "initdb --locale $(grep 'LANG=' /etc/locale.conf | sed 's/LANG=//') -D /var/lib/postgres/data"
 				else
